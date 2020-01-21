@@ -43,11 +43,31 @@ languageRouter
     }
   })
 
-languageRouter
+  languageRouter
   .get('/head', async (req, res, next) => {
-    // implement me
-    res.send('implement me!')
-  })
+    try {
+
+      const word = await LanguageService.getHeadWord(
+        req.app.get('db'),
+        req.user.id,
+      );
+
+      const score = await LanguageService.getTotalScore(
+        req.app.get('db'),
+        req.user.id,
+      );
+      
+      res.status(200).json({
+        nextWord: word[0].original,
+        totalScore: score[0].total_score,
+        wordCorrectCount: word[0].correct_count,
+        wordIncorrectCount: word[0].incorrect_count 
+      })
+      next()
+    } catch (error) {
+      next(error)
+    }
+  });
 
 languageRouter
   .post('/guess', async (req, res, next) => {
