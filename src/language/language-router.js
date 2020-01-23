@@ -59,6 +59,7 @@ languageRouter
       
       res.status(200).json({
         nextWord: word[0].original,
+        // translation:word[0].translation,
         totalScore: score[0].total_score,
         wordCorrectCount: word[0].correct_count,
         wordIncorrectCount: word[0].incorrect_count 
