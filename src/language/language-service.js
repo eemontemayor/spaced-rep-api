@@ -59,29 +59,30 @@ const LanguageService = {
       .where({ user_id });
   },
   //===============================
-  updateUserLanguage(db, user_id, head, total_score) {
+  updateUserLanguage(db, user_id, update) {
     return db
       .into('language')
-      .update({
-        head,
-        total_score
-      })
+      .update(
+        // head: update.head,
+        // total_score: update.total_score,
+        update
+      )
       .where({user_id})
-      .returning('total_score');
+      // .returning('total_score');
   },
 
-  updateWord(db, id, update) {
+  updateWordById(db, id, update) {
     return db
       .into('word')
-      .update({
+      .update(
         // next: update.next,
         // correct_count: update.correct_count,
         // incorrect_count: update.incorrect_count,
         // memory_value: update.memory_value,
         update
-      })
+      )
       .where({id})
-      .returning('*');
+      // .returning('*');
   }
 }
 

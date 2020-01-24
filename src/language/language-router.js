@@ -61,7 +61,6 @@ languageRouter
       
       res.status(200).json({
         nextWord: word[0].original,
-        // translation:word[0].translation,
         totalScore: score[0].total_score,
         wordCorrectCount: word[0].correct_count,
         wordIncorrectCount: word[0].incorrect_count 
@@ -103,14 +102,14 @@ languageRouter
 
              // finding the next head in words with nextHeadId
       const nextHeadId = head[0].next
- 
+    
       const nextHead = words.filter(word => word.id === nextHeadId)
   
 
 
       let LL = new LinkedList;
       buildList(LL, head[0], words)
-      console.log('============BEFORE=====================')
+      console.log('============BEFORE=====================', totalScore)
       ListService.displayList(LL)
       
 
@@ -127,11 +126,17 @@ languageRouter
       answer:head[0].translation
     }  
       let headWordUpdate = {
-       
+        memory_value : head[0].memory_value,
+        correct_count: head[0].correct_count,
+        incorrect_count : head[0].incorrect_count
      }
       let prevWordUpdate = {
       
-    }
+      }
+      let langTableUpdate = {
+        head: nextHeadId,
+        total_score:totalScore[0].total_score
+      }
     
      
 
@@ -139,74 +144,81 @@ languageRouter
     if(guess === head[0].translation){  
         
       resObj.isCorrect=true
-      totalScore += 1;
+     langTableUpdate.total_score += 1;
 
-      headWordUpdate.memory_value = head[0].memory_value *= 2;
-      headWordUpdate.correct_count= head[0].correct_count += 1;
-      // headWordUpdate.next = 
+      headWordUpdate.memory_value *= 2;
+      headWordUpdate.correct_count += 1;
+    
 
     } else{
       resObj.isCorrect=false;
   
 
-      headWordUpdate.memory_value = head[0].memory_value = 1;
-      headWordUpdate.incorrect_count = head[0].incorrect_count += 1;
-      // headWordUpdate.next = 
+      headWordUpdate.memory_value = 1;
+      headWordUpdate.incorrect_count += 1;
+
 
     }
 
       
       LL.remove(head[0])
       LL.insertAt(head[0].memory_value, head[0])
-      //find out new .next value of oldHead
+      
       // find prev word after moving oldHead down the list (to update next id #)
-    
       let prevWordNode = ListService.findPrevious(LL, head[0])
       
+      //find out new .next value of oldHead
       headWordUpdate.next = prevWordNode.value.next
-
+      
       prevWordUpdate.next = head[0].id
 
-      console.log('============AFTER=====================')   
-      console.log(prevWordUpdate,'------------------------------------------') 
-      console.log(headWordUpdate)
-      ListService.displayList(LL)
+   
+
+
 
 
       // update language table (points to new head id # and totalScore)
-      // LanguageService.updateUserLanguage(
-      //   req.app.get('db'),
-      //   req.user.id,
-      //   nextHeadId,
-      //   totalScore
-      // )
+    await  LanguageService.updateUserLanguage(
+        req.app.get('db'),
+      req.user.id, 
+        langTableUpdate
+      )
 
       //update word table (updates in/correct_count and next id # on word just guessed on)
-      // LanguageService.updateWordById(
-      //   req.app.get('db'),
-      //   head[0].id,
-      //   headWordUpdate
-      // )
+     await LanguageService.updateWordById(
+        req.app.get('db'),
+        head[0].id,
+        headWordUpdate
+      )
 
       
 // update prevWord (updates next id # to point to old head)      
-      // LanguageService.updateWordById(
-      //   req.app.get('db'),
-      //   prevWordNode.value.id,
-      //   prevWordUpdate
-      // )
+     await LanguageService.updateWordById(
+        req.app.get('db'),
+        prevWordNode.value.id,
+        prevWordUpdate
+      )
 
 //get new head (original word correct count and incorrect count)
+const word = await LanguageService.getHeadWord(
+  req.app.get('db'),
+  req.user.id,
+);
 
-      response = {
-        // nextWord:newHead.original,
-        // wordCorrectCount:newHead.correct_count,
-        // wordIncorrectCount:newHead.incorrect_count,
-        answer:resObj.answer,
-        isCorrect:resObj.isCorrect,
-        totalScore:Number(totalScore),
-      }
-      res.status(200).json(response)
+const score = await LanguageService.getTotalScore(
+  req.app.get('db'),
+  req.user.id,
+);
+
+res.status(200).json({
+  nextWord: word[0].original,
+  totalScore: score[0].total_score,
+  wordCorrectCount: word[0].correct_count,
+  wordIncorrectCount: word[0].incorrect_count ,
+  answer:resObj.answer,
+  isCorrect:resObj.isCorrect,
+})
+      
 
      next()
     } catch (error) {
