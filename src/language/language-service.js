@@ -68,7 +68,7 @@ const LanguageService = {
         update
       )
       .where({user_id})
-      // .returning('total_score');
+      .returning('total_score');
   },
 
   updateWordById(db, id, update) {
@@ -82,7 +82,7 @@ const LanguageService = {
         update
       )
       .where({id})
-      // .returning('*');
+      .returning('*');
   }
 }
 

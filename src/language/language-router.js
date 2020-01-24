@@ -109,15 +109,9 @@ languageRouter
 
       let LL = new LinkedList;
       buildList(LL, head[0], words)
-      console.log('============BEFORE=====================', totalScore)
+   
       ListService.displayList(LL)
       
-
-      //correct answer
-      // const correct = head[0].translation
-
-      //declaring variables for guess check and later response
-    
 
 
             
@@ -146,9 +140,11 @@ languageRouter
       resObj.isCorrect=true
      langTableUpdate.total_score += 1;
 
-      headWordUpdate.memory_value *= 2;
+
+      
+      headWordUpdate.memory_value *= 2 ;
       headWordUpdate.correct_count += 1;
-    
+
 
     } else{
       resObj.isCorrect=false;
@@ -160,9 +156,18 @@ languageRouter
 
     }
 
+    
+    LL.remove(head[0])
+    let listSize = ListService.size(LL)
+
       
-      LL.remove(head[0])
-      LL.insertAt(head[0].memory_value, head[0])
+      if (head[0].memory_value >= listSize -1 ) {
+        LL.insertLast(head[0])
+        headWordUpdate.memory_value = listSize -1
+      } else {
+        
+        LL.insertAt(headWordUpdate.memory_value, head[0])
+      }
       
       // find prev word after moving oldHead down the list (to update next id #)
       let prevWordNode = ListService.findPrevious(LL, head[0])
@@ -175,31 +180,32 @@ languageRouter
    
 
 
-
+      ListService.displayList(LL)
 
       // update language table (points to new head id # and totalScore)
-    await  LanguageService.updateUserLanguage(
+   const updatedTotalScore= await  LanguageService.updateUserLanguage(
         req.app.get('db'),
       req.user.id, 
         langTableUpdate
-      )
+   )
+      
 
       //update word table (updates in/correct_count and next id # on word just guessed on)
-     await LanguageService.updateWordById(
+     const oldHead = await LanguageService.updateWordById(
         req.app.get('db'),
         head[0].id,
         headWordUpdate
       )
 
       
-// update prevWord (updates next id # to point to old head)      
+// update prevWord after oldHead is moved (updates next id # to point to old head)      
      await LanguageService.updateWordById(
         req.app.get('db'),
         prevWordNode.value.id,
         prevWordUpdate
       )
 
-//get new head (original word correct count and incorrect count)
+//get new head (original, word correct count and incorrect count)
 const word = await LanguageService.getHeadWord(
   req.app.get('db'),
   req.user.id,
@@ -212,10 +218,10 @@ const score = await LanguageService.getTotalScore(
 
 res.status(200).json({
   nextWord: word[0].original,
-  totalScore: score[0].total_score,
+  totalScore: updatedTotalScore[0],
   wordCorrectCount: word[0].correct_count,
   wordIncorrectCount: word[0].incorrect_count ,
-  answer:resObj.answer,
+  answer: resObj.answer,
   isCorrect:resObj.isCorrect,
 })
       
