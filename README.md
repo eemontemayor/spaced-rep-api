@@ -1,52 +1,44 @@
-# Spaced repetition API!
+# REPS
+## Spaced Repetition Capstone Project
 
-## Local dev setup
 
-If using user `dunder-mifflin`:
+## Author
 
-```bash
-mv example.env .env
-createdb -U dunder-mifflin spaced-repetition
-createdb -U dunder-mifflin spaced-repetition-test
-```
+ Enrique Montemayor
 
-If your `dunder-mifflin` user has a password be sure to set it in `.env` for all appropriate fields. Or if using a different user, update appropriately.
 
-```bash
-npm install
-npm run migrate
-env MIGRATION_DB_NAME=spaced-repetition-test npm run migrate
-```
+## Live Application Link: 
+[Reps] XXXXXXXXXX
 
-And `npm test` should work at this point
+## Summary:
 
-## Configuring Postgres
+This app is designed for optimal learning of the Spanish language using a spaced repetition algorithm. If you guess the translation of a given word correctly, you will be quizzed on it less often. Consecutive correct guess of a particular word will push that word further and further down the linked list.
 
-For tests involving time to run properly, configure your Postgres database to run in the UTC timezone.
 
-1. Locate the `postgresql.conf` file for your Postgres installation.
-   1. E.g. for an OS X, Homebrew install: `/usr/local/var/postgres/postgresql.conf`
-   2. E.g. on Windows, _maybe_: `C:\Program Files\PostgreSQL\11.2\data\postgresql.conf`
-   3. E.g  on Ubuntu 18.04 probably: '/etc/postgresql/10/main/postgresql.conf'
-2. Find the `timezone` line and set it to `UTC`:
+Simply create an account and start learning!
 
-```conf
-# - Locale and Formatting -
 
-datestyle = 'iso, mdy'
-#intervalstyle = 'postgres'
-timezone = 'UTC'
-#timezone_abbreviations = 'Default'     # Select the set of available time zone
-```
 
-## Scripts
+## Client Repo: 
+[Reps Client]XXXXXXX
 
-Start the application `npm start`
+## Server Repo:
+[Reps Server]XXXXXX
 
-Start nodemon for the application `npm run dev`
+### API Documentation:
+GET /api/language
+    returns the list of words for the given language
 
-Run the tests mode `npm test`
+GET  /api/language/head
+    returns: the next word the user will be quizzed on,                 
+            the number of correct and incorrect guesses for the head word 
+            the user's total score for that language
 
-Run the migrations up `npm run migrate`
+POST /api/language/guess
+    returns: the correct answer,updated total score, the next word and its data, 
 
-Run the migrations down `npm run migrate -- 0`
+    "Memory value" is used to ensure that words that have been answered correctly multiple times are tested less frequently, while the correct and incorrect counts are the number of times the user has guessed correctly or incorrectly. "Next" points to the next word on the linked list.
+
+
+### Screenshots
+XXXXXX
