@@ -110,9 +110,10 @@ languageRouter
       let LL = new LinkedList;
       buildList(LL, head[0], words)
    
+      console.log('^^^^^^^^^^^^^^^^^^^^^  BEFORE   ^^^^^^^^^^^^^^^^^^^^^^')
       ListService.displayList(LL)
       
-
+    
 
             
     let resObj = {
@@ -157,15 +158,16 @@ languageRouter
     }
 
     
+    let listSize = await ListService.size(LL)
     LL.remove(head[0])
-    let listSize = ListService.size(LL)
 
       
-      if (head[0].memory_value >= listSize -1 ) {
+      if (headWordUpdate.memory_value >= listSize-1) {
         LL.insertLast(head[0])
-        headWordUpdate.memory_value = listSize -1
+        headWordUpdate.memory_value = listSize-1
+        // -1 ?
       } else {
-        
+        console.log('!!!!!!!!!!!!!!!!!!!!',listSize, headWordUpdate.memory_value)
         LL.insertAt(headWordUpdate.memory_value, head[0])
       }
       
@@ -179,7 +181,7 @@ languageRouter
 
    
 
-
+      console.log('^^^^^^^^^^^^^^^^^^^^^  AFTER   ^^^^^^^^^^^^^^^^^^^^^^')
       ListService.displayList(LL)
 
       // update language table (points to new head id # and totalScore)
