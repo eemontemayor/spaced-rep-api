@@ -83,6 +83,14 @@ const LanguageService = {
       )
       .where({id})
       .returning('*');
+  },
+  getWordById(db, wordId){
+    return db
+      .from('word')
+      .select('word.*')
+      .join('language', 'language.id', '=', 'word.language_id')
+      .where({ 'word.id': wordId })
+      .returning('*');
   }
 }
 

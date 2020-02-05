@@ -27,7 +27,7 @@ languageRouter
     }
   })
 
-languageRouter
+
   .get('/', async (req, res, next) => {
     try {
       const words = await LanguageService.getLanguageWords(
@@ -71,6 +71,23 @@ languageRouter
     }
   });
 
+  languageRouter
+    .get('/word/:word_id', async (req, res, next) => {
+    console.log('^^^^^^^^^^^^^^^^got here^^^^^^^^^')
+    try {
+      let word = await LanguageService.getWordById(
+        req.app.get('db'),
+        req.params.word_id
+      )
+        word=word[0]
+      res.status(200).json({
+        word
+      })
+      next()
+    } catch (error) {
+      next(error)
+    }
+  })
 languageRouter
   .post('/guess',jsonBodyParser, async (req, res, next) => {
     const { guess } = req.body
