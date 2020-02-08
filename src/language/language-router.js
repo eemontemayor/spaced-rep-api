@@ -71,15 +71,16 @@ languageRouter
     }
   });
 
-  languageRouter
-    .get('/word/:word_id', async (req, res, next) => {
-    console.log('^^^^^^^^^^^^^^^^got here^^^^^^^^^')
+languageRouter
+  .get('/word/:word_id', async (req, res, next) => {
+    
     try {
+      
       let word = await LanguageService.getWordById(
         req.app.get('db'),
         req.params.word_id
       )
-        word=word[0]
+      word = word[0]
       res.status(200).json({
         word
       })
@@ -87,7 +88,97 @@ languageRouter
     } catch (error) {
       next(error)
     }
-  })
+  });
+    languageRouter
+    .delete('/word/:word_id',async (req, res, next) => {
+       
+      try {
+
+    //(1)get wordToDelete's next value
+    let wordToDelete = await LanguageService.getWordById(
+      req.app.get('db'),
+      req.params.word_id
+    )
+    let newNextId = wordToDelete[0].next
+    console.log(wordToDelete[0],'<<---------')
+    
+      // (2) Get List
+              
+        
+        let head = await LanguageService.getHeadWord(
+          req.app.get('db'),
+          req.user.id,
+        );
+  
+        let words = await LanguageService.getLanguageWords(
+          req.app.get('db'),
+          head[0].language_id
+        );
+       
+  
+  
+        let LL = new LinkedList;
+       await buildList(LL, head[0], words)
+     
+       ListService.displayList(LL)
+        console.log('^^^^^^^^^^^^^^^^^^^^^  List   ^^^^^^^^^^^^^^^^^^^^^^')
+
+
+
+
+        //(3) get prevWord and update it's next value
+        console.log(wordToDelete[0],'++++++++++++++++++++')
+        let previousWord = await ListService.findPrevious(LL, wordToDelete[0])
+          console.log(previousWord,'prev word')
+        
+      //   if (prevWord[0] === undefined) {
+      //     let langTableUpdate = {}
+      //     langTableUpdate.head = newNextId
+      //     await  LanguageService.updateUserLanguage(
+      //       req.app.get('db'),
+      //     req.user.id, 
+      //       langTableUpdate
+      //  )
+      //   }
+        
+        
+        
+        
+        // if (prevWord[0] !== undefined) {
+        //   let prevWordUpdate = {}
+        //   prevWordUpdate.next = newNextId
+            
+        //   await LanguageService.updateWordById(
+        //     req.app.get('db'),
+        //     prevWord[0].id,
+        //     prevWordUpdate
+        //   )
+        // } else {
+        //   // in case the word to delete is the headword
+        //   let langTableUpdate = {}
+        //   langTableUpdate.next = newNextId
+
+        // }
+        
+
+
+        //(4) remove word to Delete
+
+
+        // await LanguageService.deleteWordById(
+        //   req.app.get('db'),
+        //   wordToDelete[0].id
+        // )
+
+
+     
+       
+        res.status(200)
+        next()
+      } catch (error) {
+        next(error)
+      }
+      })
 languageRouter
   .post('/guess',jsonBodyParser, async (req, res, next) => {
     const { guess } = req.body
@@ -120,7 +211,7 @@ languageRouter
              // finding the next head in words with nextHeadId
       const nextHeadId = head[0].next
     
-      const nextHead = words.filter(word => word.id === nextHeadId)
+      // const nextHead = words.filter(word => word.id === nextHeadId)
   
 
 
