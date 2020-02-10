@@ -50,13 +50,11 @@ const ListService = {
 
  findPrevious(lst, item) {
      let currNode = lst.head;
-     console.log('-------------------------------------')
-
-     console.log(currNode)
-     console.log('-------------------------------------')
+   
      while ((currNode !== null) && (currNode.next !== item)) {
         currNode = currNode.next;
-    }
+     
+     }
     return currNode;
 },
 

@@ -89,47 +89,45 @@ languageRouter
       next(error)
     }
   });
+
+
     languageRouter
-    .delete('/word/:word_id',async (req, res, next) => {
+    .delete('/word/:word_id',jsonBodyParser,async (req, res, next) => {
        
       try {
 
-    //(1)get wordToDelete's next value
-    let wordToDelete = await LanguageService.getWordById(
-      req.app.get('db'),
-      req.params.word_id
-    )
-    let newNextId = wordToDelete[0].next
-    console.log(wordToDelete[0],'<<---------')
-    
-      // (2) Get List
+      // (1) Get and build List
               
-        
         let head = await LanguageService.getHeadWord(
           req.app.get('db'),
           req.user.id,
         );
-  
+        console.log(head[0], 'head[0]')
+        
         let words = await LanguageService.getLanguageWords(
           req.app.get('db'),
           head[0].language_id
         );
        
-  
-  
+
+        let wordToDelete = await LanguageService.getWordById(
+          req.app.get('db'),
+          req.params.word_id,
+          req.user.id,
+        )
+        console.log(wordToDelete[0],'wordToDelete[0]')
+
         let LL = new LinkedList;
-       await buildList(LL, head[0], words)
+        buildList(LL, head[0], words)
      
-       ListService.displayList(LL)
-        console.log('^^^^^^^^^^^^^^^^^^^^^  List   ^^^^^^^^^^^^^^^^^^^^^^')
+      //  ListService.displayList(LL)
+        // console.log('^^^^^^^^^^^^^^^^^^^^^  List   ^^^^^^^^^^^^^^^^^^^^^^')
 
 
-
-
-        //(3) get prevWord and update it's next value
-        console.log(wordToDelete[0],'++++++++++++++++++++')
-        let previousWord = await ListService.findPrevious(LL, wordToDelete[0])
-          console.log(previousWord,'prev word')
+        
+       
+        let prevWordNode =  ListService.findPrevious(LL, wordToDelete[0])
+          console.log(prevWordNode,'prev word')
         
       //   if (prevWord[0] === undefined) {
       //     let langTableUpdate = {}

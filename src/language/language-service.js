@@ -84,12 +84,13 @@ const LanguageService = {
       .where({id})
       .returning('*');
   },
-  getWordById(db, wordId){
+  getWordById(db, wordId, user_id){
     return db
       .from('word')
       .select('word.*')
       .join('language', 'language.id', '=', 'word.language_id')
       .where({ 'word.id': wordId })
+      // .andWhere({ 'language.user_id': user_id })
       .returning('*');
   }
 }
