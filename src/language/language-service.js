@@ -18,13 +18,13 @@ const LanguageService = {
       .from('word')
       .select(
         'id',
-        'language_id',
         'original',
         'translation',
-        'next',
         'memory_value',
         'correct_count',
         'incorrect_count',
+        'language_id',
+        'next',
       )
       .where({ language_id })
   },
@@ -84,15 +84,15 @@ const LanguageService = {
       .where({id})
       .returning('*');
   },
-  getWordById(db, wordId, user_id){
+  getWordById(db, wordId){
     return db
       .from('word')
       .select('word.*')
       .join('language', 'language.id', '=', 'word.language_id')
       .where({ 'word.id': wordId })
-      // .andWhere({ 'language.user_id': user_id })
-      .returning('*');
-  }
+
+  },
+ 
 }
 
 module.exports = LanguageService
