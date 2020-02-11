@@ -96,8 +96,7 @@ class LinkedList {
         //keep track of previous
         let previousNode = this.head;
         while ((currNode !== null) && (currNode.value !== item)) {
-           
-            console.log(currNode.value.id, item.id)
+            
             //save the previous node 
             previousNode = currNode;
             currNode = currNode.next;

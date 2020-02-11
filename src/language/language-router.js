@@ -92,17 +92,17 @@ languageRouter
 
 
     languageRouter
-    .delete('/word/:word_id',jsonBodyParser,async (req, res, next) => {
+    .delete('/word/:word_id',async (req, res, next) => {
        
       try {
-
+   
       // (1) Get and build List
         
         let head = await LanguageService.getHeadWord(
           req.app.get('db'),
           req.user.id,
         );
-        console.log(head[0], 'head[0]')
+        // console.log(head[0], 'head[0]')
         
         let words = await LanguageService.getLanguageWords(
           req.app.get('db'),
@@ -115,8 +115,7 @@ languageRouter
           req.params.word_id,
        
         )
-       
-        console.log(wordToDelete[0],'wordToDelete[0]')
+        // console.log(wordToDelete[0],'wordToDelete[0]')
 
 
         let prevWordNodeUpdate = {
@@ -126,14 +125,16 @@ languageRouter
 
 
         let LL = new LinkedList;
-       await buildList(LL, head[0], words)
+        buildList(LL, head[0], words)
      
-       ListService.displayList(LL)
+        let listSize = await ListService.size(LL)      
+        console.log(listSize,'<-------- list size')
         
-        
+
+
 //(2) find previous word and update its next value before deleting
         let prevWordNode =  ListService.findPrevious(LL, wordToDelete[0])
-          console.log(prevWordNode,'prev word')
+          console.log(prevWordNode,'<------prev word')
 
 
        
@@ -179,7 +180,12 @@ languageRouter
       } catch (error) {
         next(error)
       }
-      })
+    })
+      
+
+
+
+
 languageRouter
   .post('/guess',jsonBodyParser, async (req, res, next) => {
     const { guess } = req.body
