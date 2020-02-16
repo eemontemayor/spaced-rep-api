@@ -53,7 +53,7 @@ const ListService = {
 
      while ((currNode !== null) && (currNode.next !== item)) {
         currNode = currNode.next;
-       
+    
      }
     return currNode;
 },

@@ -116,7 +116,7 @@ class LinkedList {
             return null;
         }
         while (currNode.value !== item) {
-           
+           console.log(currNode.value, '=========',item)
             //return null if end of the list 
             // and the item is not on the list
             if (currNode.next === null) {

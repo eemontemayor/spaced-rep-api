@@ -84,6 +84,19 @@ const LanguageService = {
       .where({id})
       .returning('*');
   },
+  updateWordByNextId(db, next, update) {
+    return db
+      .into('word')
+      .update(
+        // next: update.next,
+        // correct_count: update.correct_count,
+        // incorrect_count: update.incorrect_count,
+        // memory_value: update.memory_value,
+        update
+      )
+      .where({next})
+      .returning('*');
+  },
   getWordById(db, wordId){
     return db
       .from('word')
@@ -92,7 +105,14 @@ const LanguageService = {
       .where({ 'word.id': wordId })
 
   },
- 
+  deleteWordById(db, wordId){
+    return db
+      .from('word')
+      .join('language', 'language.id', '=', 'word.language_id')
+      .where({ 'word.id': wordId })
+      .delete()
+
+  },
 }
 
 module.exports = LanguageService

@@ -1,7 +1,8 @@
 const express = require('express')
 const LanguageService = require('./language-service')
 const { requireAuth } = require('../middleware/jwt-auth')
-const  LinkedList  = require('../linked-list/list')
+const LinkedList = require('../linked-list/list')
+// const  _Node  = require('../linked-list/list')
 const {ListService, buildList}=require('../linked-list/list-service')
 const jsonBodyParser = express.json()
 const languageRouter = express.Router()
@@ -91,95 +92,59 @@ languageRouter
   });
 
 
-    languageRouter
-    .delete('/word/:word_id',async (req, res, next) => {
-       
-      try {
-   
-      // (1) Get and build List
-        
-        let head = await LanguageService.getHeadWord(
-          req.app.get('db'),
-          req.user.id,
-        );
-        // console.log(head[0], 'head[0]')
-        
-        let words = await LanguageService.getLanguageWords(
-          req.app.get('db'),
-          head[0].language_id
-        );
-       
+languageRouter
+.delete('/word/:word_id',async (req, res, next) => {
+    
+  try {
 
-        let wordToDelete = await LanguageService.getWordById(
-          req.app.get('db'),
-          req.params.word_id,
-       
-        )
-        // console.log(wordToDelete[0],'wordToDelete[0]')
+    let head = await LanguageService.getHeadWord(
+      req.app.get('db'),
+      req.user.id,
+    );
 
+    let wordToDelete = await LanguageService.getWordById(
+      req.app.get('db'),
+      req.params.word_id,
+    )
 
-        let prevWordNodeUpdate = {
-          next : wordToDelete[0].next
-        }
+    // if word to delete is head word: 
+    if (wordToDelete[0].id === head[0].id) {
 
+      let langTableUpdate = {}
 
+      langTableUpdate.head = wordToDelete[0].next
 
-        let LL = new LinkedList;
-        buildList(LL, head[0], words)
-     
-        let listSize = await ListService.size(LL)      
-        console.log(listSize,'<-------- list size')
-        
+      await  LanguageService.updateUserLanguage(
+        req.app.get('db'),
+        req.user.id, 
+        langTableUpdate
+      )
+      
+    } else {
 
-
-//(2) find previous word and update its next value before deleting
-        let prevWordNode =  ListService.findPrevious(LL, wordToDelete[0])
-          console.log(prevWordNode,'<------prev word')
-
-
-       
-       // if word to delete is head word: 
-      //   if (prevWord[0] === undefined) {
-      //     let langTableUpdate = {}
-      //     langTableUpdate.head = newNextId
-      //     await  LanguageService.updateUserLanguage(
-      //       req.app.get('db'),
-      //     req.user.id, 
-      //       langTableUpdate
-      //  )
-      //   }
-        
-        
-        
-        //if word to delete is not head word:
-        // if (prevWord[0] !== undefined) {
-        
-            
-        //   await LanguageService.updateWordById(
-        //     req.app.get('db'),
-        //     prevWordNode[0].id,
-        //     prevWordNodeUpdate
-        //   )
-        // } 
-        
-
-
-        //(4) remove word to Delete
-
-
-        // await LanguageService.deleteWordById(
-        //   req.app.get('db'),
-        //   wordToDelete[0].id
-        // )
-
-
-     
-       
-        res.status(204)
-        next()
-      } catch (error) {
-        next(error)
+      let prevWordUpdate = {
+        next : wordToDelete[0].next
       }
+
+      await LanguageService.updateWordByNextId(
+        req.app.get('db'),
+        req.params.word_id,
+        prevWordUpdate
+      )
+      
+    }
+    
+    //remove word from database
+    await LanguageService.deleteWordById(
+      req.app.get('db'),
+      wordToDelete[0].id
+    )
+
+    res.status(204)
+    next()
+  } catch (error) {
+    next(error)
+  }
     })
       
 
