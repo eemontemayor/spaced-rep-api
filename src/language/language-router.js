@@ -183,7 +183,7 @@ languageRouter
              // finding the next head in words with nextHeadId
       const nextHeadId = head[0].next
     
-      // const nextHead = words.filter(word => word.id === nextHeadId)
+
   
 
 
@@ -244,10 +244,8 @@ languageRouter
       
       if (headWordUpdate.memory_value >= listSize-1) {
         LL.insertLast(head[0])
-        // headWordUpdate.memory_value = listSize-1
-        // -1 ?
       } else {
-        console.log('!!!!!!!!!!!!!!!!!!!!',listSize, headWordUpdate.memory_value)
+       
         LL.insertAt(headWordUpdate.memory_value, head[0])
       }
       
