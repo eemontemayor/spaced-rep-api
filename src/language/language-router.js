@@ -140,7 +140,7 @@ languageRouter
       wordToDelete[0].id
     )
 
-    res.status(204)
+    res.status(204).end()
     next()
   } catch (error) {
     next(error)
