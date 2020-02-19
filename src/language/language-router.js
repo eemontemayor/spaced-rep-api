@@ -107,10 +107,11 @@ languageRouter
       req.params.word_id,
     )
 
+
+    
     // if word to delete is head word: 
     if (wordToDelete[0].id === head[0].id) {
 
-      let langTableUpdate = {}
 
       langTableUpdate.head = wordToDelete[0].next
 
@@ -134,6 +135,25 @@ languageRouter
       
     }
     
+    if (wordToDelete[0].correct_count > 0) {
+      let score = await LanguageService.getTotalScore(
+        req.app.get('db'),
+        req.user.id,
+      );
+        let totalScore = score[0].total_score
+            totalScore = totalScore - wordToDelete[0].correct_count
+      let totalScoreUpdate = {
+          total_score : totalScore
+      }
+      await  LanguageService.updateUserLanguage(
+        req.app.get('db'),
+        req.user.id, 
+        totalScoreUpdate
+      )
+    }
+
+
+
     //remove word from database
     await LanguageService.deleteWordById(
       req.app.get('db'),
