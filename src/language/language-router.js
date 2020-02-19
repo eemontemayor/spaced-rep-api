@@ -112,7 +112,7 @@ languageRouter
     // if word to delete is head word: 
     if (wordToDelete[0].id === head[0].id) {
 
-
+      let langTableUpdate={}
       langTableUpdate.head = wordToDelete[0].next
 
       await  LanguageService.updateUserLanguage(
