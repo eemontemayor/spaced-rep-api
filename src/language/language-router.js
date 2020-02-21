@@ -357,7 +357,7 @@ res.status(200).json({
       correct_count: 0,
       incorrect_count:0,
       memory_value: 1,
-      next: null,
+      // next: null,
      
     }
     try {
@@ -393,10 +393,31 @@ res.status(200).json({
       let listSize = await ListService.size(LL)
 
       //1) insert in list
-      if (listSize <= 3) {
-        //insert last
+      if (listSize < 30) {
+         newWord.next = null
+        let insertedWord = await LanguageService.insertWord( // insert into database so we can retrieve it's id
+          req.app.get('db'),
+          newWord
+        )
+        let newNextId = insertedWord.id
+        
+        console.log(newNextId, '<====')
+        
+        let lastWord = ListService.findLast(LL)
+        console.log(lastWord.value.id, '<==== Last word.val.id')
+        
+        let lastWordUpdate = {
+          next:newNextId   
+        }
+        await LanguageService.updateWordById(
+          req.app.get('db'),
+          lastWord.value.id,
+          lastWordUpdate
+        )
+
+        //find last , change its next value (new word next is already null)
       } else {
-        // insertAt(3, newWord)
+          // find 3rd element 
       }
       console.log('#############  AFTER   #############')
       ListService.displayList(LL)
