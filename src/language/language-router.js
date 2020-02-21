@@ -2,10 +2,25 @@ const express = require('express')
 const LanguageService = require('./language-service')
 const { requireAuth } = require('../middleware/jwt-auth')
 const LinkedList = require('../linked-list/list')
-// const  _Node  = require('../linked-list/list')
+const xss = require('xss')
 const {ListService, buildList}=require('../linked-list/list-service')
 const jsonBodyParser = express.json()
 const languageRouter = express.Router()
+
+
+const serializeWord = word => ({
+  id: word.id,
+  original: xss(word.original),
+  translation:xss(word.translation),
+  memory_value: word.memory_value,
+  correct_count: word.correct_count,
+  incorrect_count: word.incorrect_count,
+  language_id:word.language_id,
+  next: word.next,
+  
+
+})
+
 
 languageRouter
   .use(requireAuth)
@@ -331,5 +346,83 @@ res.status(200).json({
      next(error)
     }
   })
+
+
+  .post('/word', jsonBodyParser, async (req, res, next) => {
+    const { original,translation, language_id } = req.body.word
+    const newWord = {
+      original,
+      translation,
+      language_id,
+      correct_count: 0,
+      incorrect_count:0,
+      memory_value: 1,
+      next: null,
+     
+    }
+    try {
+      
+    
+      for (const [key, value] of Object.entries(newWord)) {
+        if (value == null) {
+          return res.status(400).json({
+            error: { message: `Missing '${key}' in request body` }
+          })
+        }
+      }
+
+      console.log(newWord, '***** NEW WORD *****')
+
+
+      let head = await LanguageService.getHeadWord(
+        req.app.get('db'),
+        req.user.id,
+      );
+
+      let words = await LanguageService.getLanguageWords(
+        req.app.get('db'),
+        head[0].language_id
+      );
+
+      let LL = new LinkedList;
+      buildList(LL, head[0], words)
+   
+      console.log('^^^^^^^^^^^^^^^^^^^^^  BEFORE   ^^^^^^^^^^^^^^^^^^^^^^')
+      ListService.displayList(LL)
+
+      let listSize = await ListService.size(LL)
+
+      //1) insert in list
+      if (listSize <= 3) {
+        //insert last
+      } else {
+        // insertAt(3, newWord)
+      }
+      console.log('#############  AFTER   #############')
+      ListService.displayList(LL)
+
+      //(2) update new word next value
+      //(3) find prev and update it's next value to be new word id
+
+
+
+      //   LanguageService.insertWord(
+      //     req.app.get('db'),
+      //     newWord
+      //   )
+      //     .then(word => {
+      //       res
+      //         .status(201)
+      //         .location(`/word/${word.id}`)
+      //         .json(serializeWord(word))
+      //   })
+      
+     //next()
+    } catch (error){
+      next(error)
+    }
+  })
+
+
 
 module.exports = languageRouter

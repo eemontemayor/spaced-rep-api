@@ -113,6 +113,15 @@ const LanguageService = {
       .delete()
 
   },
+  insertWord(db, newWord) {
+    return db
+      .insert(newWord)
+      .into('word')
+      .returning('*')
+      .then(rows => {
+          return rows[0]
+      })
+  }
 }
 
 module.exports = LanguageService
