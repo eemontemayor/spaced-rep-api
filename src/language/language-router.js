@@ -357,9 +357,8 @@ res.status(200).json({
       correct_count: 0,
       incorrect_count:0,
       memory_value: 1,
-      // next: null,
-     
     }
+    
     try {
       
     
@@ -379,66 +378,38 @@ res.status(200).json({
         req.user.id,
       );
 
-      let words = await LanguageService.getLanguageWords(
-        req.app.get('db'),
-        head[0].language_id
-      );
+      newWord.next = head[0].next
 
-      let LL = new LinkedList;
-      buildList(LL, head[0], words)
-   
-      console.log('^^^^^^^^^^^^^^^^^^^^^  BEFORE   ^^^^^^^^^^^^^^^^^^^^^^')
-      ListService.displayList(LL)
 
-      let listSize = await ListService.size(LL)
-
-      //1) insert in list
-      if (listSize < 30) {
-         newWord.next = null
         let insertedWord = await LanguageService.insertWord( // insert into database so we can retrieve it's id
           req.app.get('db'),
           newWord
         )
-        let newNextId = insertedWord.id
-        
-        console.log(newNextId, '<====')
-        
-        let lastWord = ListService.findLast(LL)
-        console.log(lastWord.value.id, '<==== Last word.val.id')
-        
-        let lastWordUpdate = {
-          next:newNextId   
-        }
-        await LanguageService.updateWordById(
-          req.app.get('db'),
-          lastWord.value.id,
-          lastWordUpdate
-        )
-
-        //find last , change its next value (new word next is already null)
-      } else {
-          // find 3rd element 
-      }
-      console.log('#############  AFTER   #############')
-      ListService.displayList(LL)
-
-      //(2) update new word next value
-      //(3) find prev and update it's next value to be new word id
-
-
-
-      //   LanguageService.insertWord(
-      //     req.app.get('db'),
-      //     newWord
-      //   )
-      //     .then(word => {
-      //       res
-      //         .status(201)
-      //         .location(`/word/${word.id}`)
-      //         .json(serializeWord(word))
-      //   })
+      let newNextId = insertedWord.id
       
-     //next()
+      let headWordUpdate = {
+          next : newNextId
+        }
+      await LanguageService.updateWordById(
+        req.app.get('db'),
+        head[0].id,
+        headWordUpdate
+        )
+  
+
+  
+
+
+
+      
+
+            res
+              .status(201)
+              .location(`/word/${insertedWord.id}`)
+              .json(serializeWord(insertedWord))
+        
+      
+     next()
     } catch (error){
       next(error)
     }
