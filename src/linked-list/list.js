@@ -82,7 +82,6 @@ class LinkedList {
     }
     remove(item) { 
      
-
         //if the list is empty
         if (!this.head){
             return null;
@@ -97,6 +96,7 @@ class LinkedList {
         //keep track of previous
         let previousNode = this.head;
         while ((currNode !== null) && (currNode.value !== item)) {
+            
             //save the previous node 
             previousNode = currNode;
             currNode = currNode.next;
@@ -108,13 +108,15 @@ class LinkedList {
         previousNode.next = currNode.next;
     }
     find(item) { //get
+     
         //start at the head
         let currNode = this.head;
         //if the list is empty
         if (!this.head){
             return null;
         }
-        while(currNode.value !== item) {
+        while (currNode.value !== item) {
+           console.log(currNode.value, '=========',item)
             //return null if end of the list 
             // and the item is not on the list
             if (currNode.next === null) {

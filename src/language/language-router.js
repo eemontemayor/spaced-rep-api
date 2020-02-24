@@ -2,9 +2,25 @@ const express = require('express')
 const LanguageService = require('./language-service')
 const { requireAuth } = require('../middleware/jwt-auth')
 const LinkedList = require('../linked-list/list')
+const xss = require('xss')
 const {ListService, buildList}=require('../linked-list/list-service')
 const jsonBodyParser = express.json()
 const languageRouter = express.Router()
+
+
+const serializeWord = word => ({
+  id: word.id,
+  original: xss(word.original),
+  translation:xss(word.translation),
+  memory_value: word.memory_value,
+  correct_count: word.correct_count,
+  incorrect_count: word.incorrect_count,
+  language_id:word.language_id,
+  next: word.next,
+  
+
+})
+
 
 languageRouter
   .use(requireAuth)
@@ -71,15 +87,16 @@ languageRouter
     }
   });
 
-  languageRouter
-    .get('/word/:word_id', async (req, res, next) => {
-    console.log('^^^^^^^^^^^^^^^^got here^^^^^^^^^')
+languageRouter
+  .get('/word/:word_id', async (req, res, next) => {
+    
     try {
+      
       let word = await LanguageService.getWordById(
         req.app.get('db'),
         req.params.word_id
       )
-        word=word[0]
+      word = word[0]
       res.status(200).json({
         word
       })
@@ -87,7 +104,88 @@ languageRouter
     } catch (error) {
       next(error)
     }
-  })
+  });
+
+
+languageRouter
+.delete('/word/:word_id',async (req, res, next) => {
+    
+  try {
+
+    let head = await LanguageService.getHeadWord(
+      req.app.get('db'),
+      req.user.id,
+    );
+
+    let wordToDelete = await LanguageService.getWordById(
+      req.app.get('db'),
+      req.params.word_id,
+    )
+
+
+    
+    // if word to delete is head word: 
+    if (wordToDelete[0].id === head[0].id) {
+
+      let langTableUpdate={}
+      langTableUpdate.head = wordToDelete[0].next
+
+      await  LanguageService.updateUserLanguage(
+        req.app.get('db'),
+        req.user.id, 
+        langTableUpdate
+      )
+      
+    } else {
+
+      let prevWordUpdate = {
+        next : wordToDelete[0].next
+      }
+
+      await LanguageService.updateWordByNextId(
+        req.app.get('db'),
+        req.params.word_id,
+        prevWordUpdate
+      )
+      
+    }
+    
+    if (wordToDelete[0].correct_count > 0) {
+      let score = await LanguageService.getTotalScore(
+        req.app.get('db'),
+        req.user.id,
+      );
+        let totalScore = score[0].total_score
+            totalScore = totalScore - wordToDelete[0].correct_count
+      let totalScoreUpdate = {
+          total_score : totalScore
+      }
+      await  LanguageService.updateUserLanguage(
+        req.app.get('db'),
+        req.user.id, 
+        totalScoreUpdate
+      )
+    }
+
+
+
+    //remove word from database
+    await LanguageService.deleteWordById(
+      req.app.get('db'),
+      wordToDelete[0].id
+    )
+
+    res.status(204).end()
+    next()
+  } catch (error) {
+    next(error)
+  }
+    })
+      
+
+
+
+
 languageRouter
   .post('/guess',jsonBodyParser, async (req, res, next) => {
     const { guess } = req.body
@@ -120,15 +218,15 @@ languageRouter
              // finding the next head in words with nextHeadId
       const nextHeadId = head[0].next
     
-      const nextHead = words.filter(word => word.id === nextHeadId)
+
   
 
 
       let LL = new LinkedList;
       buildList(LL, head[0], words)
    
-      console.log('^^^^^^^^^^^^^^^^^^^^^  BEFORE   ^^^^^^^^^^^^^^^^^^^^^^')
-      ListService.displayList(LL)
+      // console.log('^^^^^^^^^^^^^^^^^^^^^  BEFORE   ^^^^^^^^^^^^^^^^^^^^^^')
+      // ListService.displayList(LL)
       
     
 
@@ -181,10 +279,8 @@ languageRouter
       
       if (headWordUpdate.memory_value >= listSize-1) {
         LL.insertLast(head[0])
-        headWordUpdate.memory_value = listSize-1
-        // -1 ?
       } else {
-        console.log('!!!!!!!!!!!!!!!!!!!!',listSize, headWordUpdate.memory_value)
+       
         LL.insertAt(headWordUpdate.memory_value, head[0])
       }
       
@@ -198,8 +294,8 @@ languageRouter
 
    
 
-      console.log('^^^^^^^^^^^^^^^^^^^^^  AFTER   ^^^^^^^^^^^^^^^^^^^^^^')
-      ListService.displayList(LL)
+      // console.log('^^^^^^^^^^^^^^^^^^^^^  AFTER   ^^^^^^^^^^^^^^^^^^^^^^')
+      // ListService.displayList(LL)
 
       // update language table (points to new head id # and totalScore)
    const updatedTotalScore= await  LanguageService.updateUserLanguage(
@@ -250,5 +346,69 @@ res.status(200).json({
      next(error)
     }
   })
+
+
+  .post('/word', jsonBodyParser, async (req, res, next) => {
+    const { original,translation, language_id } = req.body.word
+    const newWord = {
+      original,
+      translation,
+      language_id,
+      correct_count: 0,
+      incorrect_count:0,
+      memory_value: 1,
+    }
+
+    try {
+      
+    
+      for (const [key, value] of Object.entries(newWord)) {
+        if (value == null) {
+          return res.status(400).json({
+            error: { message: `Missing '${key}' in request body` }
+          })
+        }
+      }
+
+      // console.log(newWord, '***** NEW WORD *****')
+
+
+      let head = await LanguageService.getHeadWord(
+        req.app.get('db'),
+        req.user.id,
+      );
+
+      newWord.next = head[0].next
+
+
+        let insertedWord = await LanguageService.insertWord( // insert into database so we can retrieve it's id
+          req.app.get('db'),
+          newWord
+        )
+      let newNextId = insertedWord.id
+      
+      let headWordUpdate = {
+          next : newNextId
+        }
+      await LanguageService.updateWordById(
+        req.app.get('db'),
+        head[0].id,
+        headWordUpdate
+        )
+
+
+            res
+              .status(201)
+              .location(`/word/${insertedWord.id}`)
+              .json(serializeWord(insertedWord))
+        
+      
+     next()
+    } catch (error){
+      next(error)
+    }
+  })
+
+
 
 module.exports = languageRouter

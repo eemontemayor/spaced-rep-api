@@ -49,10 +49,12 @@ const ListService = {
 },
 
  findPrevious(lst, item) {
-    let currNode = lst.head;
-    while ((currNode !== null) && (currNode.next.value !== item)) {
+     let currNode = lst.head;
+
+     while ((currNode !== null) && (currNode.next.value !== item)) {
         currNode = currNode.next;
-    }
+    
+     }
     return currNode;
 },
 
