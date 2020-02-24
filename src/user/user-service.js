@@ -66,7 +66,7 @@ const UserService = {
         ['cafe', 'coffee',7],
         ['plato', 'plate',8],
         ['bola', 'ball', 9],
-        ['home', 'casa', 10],
+        ['casa', 'home', 10],
         ['calle', 'street', null]
         
       ]
