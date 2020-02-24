@@ -370,7 +370,7 @@ res.status(200).json({
         }
       }
 
-      console.log(newWord, '***** NEW WORD *****')
+      // console.log(newWord, '***** NEW WORD *****')
 
 
       let head = await LanguageService.getHeadWord(
