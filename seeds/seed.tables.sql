@@ -29,7 +29,7 @@ VALUES
   (6, 1, 'cafe', 'coffee', 7),
   (7, 1, 'plato', 'plate', 8),
   (8, 1, 'bola', 'ball', 9),
-  (9, 1, 'home', 'casa', 10),
+  (9, 1, 'casa', 'home', 10),
   (10, 1, 'calle', 'street', null);
 
 UPDATE "language" SET head = 1 WHERE id = 1;

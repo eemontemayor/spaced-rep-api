@@ -358,7 +358,7 @@ res.status(200).json({
       incorrect_count:0,
       memory_value: 1,
     }
-    
+
     try {
       
     
@@ -395,13 +395,7 @@ res.status(200).json({
         head[0].id,
         headWordUpdate
         )
-  
 
-  
-
-
-
-      
 
             res
               .status(201)

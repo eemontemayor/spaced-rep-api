@@ -103,6 +103,7 @@ const LanguageService = {
       .select('word.*')
       .join('language', 'language.id', '=', 'word.language_id')
       .where({ 'word.id': wordId })
+      .first()
 
   },
   deleteWordById(db, wordId){
